@@ -1,0 +1,50 @@
+﻿<Window x:Class="PhotoPublisher.AddLogoForm"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PhotoPublisher"
+        mc:Ignorable="d"
+        Title="AddLogoForm" Height="450" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="auto"/>
+        </Grid.ColumnDefinitions>
+        <Canvas x:Name="canvas"
+                Grid.Column="0"
+                PreviewMouseLeftButtonDown="MouseLeftButtonDown"
+                PreviewMouseLeftButtonUp="MouseLeftButtonUp"
+                PreviewMouseMove="MouseMove">
+            <Image 
+                Grid.Column="0"
+                Source="{Binding BaseImg.OriginalImage}"/>
+            <Image 
+                    Source="{Binding LogoImg.OriginalImage}"
+                    Height="{Binding LogoImg.CurrentHeight}"
+                    Width="{Binding LogoImg.CurrentWidth}"
+                    Canvas.Left="{Binding LogoLocation.X}"
+                    Canvas.Top="{Binding LogoLocation.Y}"
+                    Grid.Column="0"
+                    MouseEnter="Canvas_MouseEnter"
+                    MouseLeave="Canvas_MouseLeave"
+                    MouseMove="Canvas_MouseMove"/>
+        </Canvas>
+        <StackPanel Grid.Column="1"
+                    Margin="5">
+            <Button Margin="5" Padding="5"
+                    Content="Open logo"
+                    Click="OpenLogoButtonClick"/>
+            <TextBox Margin="5" Padding="5"
+                     Text="{Binding LogoLocation}"/>
+            <Slider Margin="5" Padding="5"
+                    Value="{Binding LogoImg.CurrentSize}"
+                    MinWidth="200"
+                    Maximum="{Binding MaxChangesSize}"/>
+            <Button Margin="5" Padding="5"
+                    Content="Save"
+                    Click="SaveButtonClick"/>
+
+        </StackPanel>
+    </Grid>
+</Window>

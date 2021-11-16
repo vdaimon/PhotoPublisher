@@ -9,35 +9,18 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <Canvas x:Name="canvas"
-                Grid.Column="0"
-                PreviewMouseLeftButtonDown="MouseLeftButtonDown"
-                PreviewMouseLeftButtonUp="MouseLeftButtonUp"
-                PreviewMouseMove="MouseMove">
-            <Image 
-                Grid.Column="0"
-                Source="{Binding BaseImg.OriginalImage}"/>
-            <Image 
-                    Source="{Binding LogoImg.OriginalImage}"
-                    Height="{Binding LogoImg.CurrentHeight}"
-                    Width="{Binding LogoImg.CurrentWidth}"
-                    Canvas.Left="{Binding LogoLocation.X}"
-                    Canvas.Top="{Binding LogoLocation.Y}"
-                    Grid.Column="0"
-                    MouseEnter="Canvas_MouseEnter"
-                    MouseLeave="Canvas_MouseLeave"
-                    MouseMove="Canvas_MouseMove"/>
-        </Canvas>
+        <Image Grid.Column="0"
+               Source="{Binding BaseImg.OriginalImage}"/>
         <StackPanel Grid.Column="1"
-                    Margin="5">
-            <TextBox Text="{Binding LogoLocation}"/>
-            <Slider 
-                    Value="{Binding LogoImg.CurrentSize}"
-                    MinWidth="200"
-                    Maximum="{Binding MaxChangesSize}"/>
-            
+                    Margin="20">
+            <Button Padding="5" Margin="5"
+                    Content="Open image"
+                    Click="OpenImageButtonClick"/>
+            <Button Padding="5" Margin="5"
+                    Content="Add logo"
+                    Click="AddLogoButtonClick"/>
         </StackPanel>
     </Grid>
 </Window>

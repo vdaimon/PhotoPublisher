@@ -10,7 +10,7 @@ namespace PhotoPublisher
         {
             using (var stream = new MemoryStream())
             {
-                img.SaveAsBmp(stream);
+                img.SaveAsPng(stream);
                 stream.Seek(0, SeekOrigin.Begin);
 
                 BitmapImage bitmap = new BitmapImage();
