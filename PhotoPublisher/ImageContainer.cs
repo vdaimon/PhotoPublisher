@@ -1,34 +1,50 @@
-﻿using System.Windows.Media.Imaging;
+﻿using System.Drawing;
+using System.IO;
+using System.Windows.Media.Imaging;
 
 namespace PhotoPublisher
 {
     public class ImageContainer:INPC
     {
-        private readonly double _originalHeight;
-        private readonly double _originalWidth;
         private double _currentHeight;
         private double _currentWidth;
         private double _currentSize;
+        private BitmapImage _originalImage;
+        private BitmapImage _presentationImage;
 
-        public BitmapImage OriginalImage { get; }
+        public BitmapImage PresentationImage { get => _presentationImage; set => Set(ref _presentationImage, value); }
         public double CurrentHeight { get => _currentHeight; set => Set(ref _currentHeight, value); }
         public double CurrentWidth { get => _currentWidth; set => Set(ref _currentWidth, value); }
-
         public double CurrentSize { get => _currentSize; set => Set(ref _currentSize, value, ()=> Resize(value)); }
-        public double OriginalHeight { get => _originalHeight; }
-        public double OriginalWidth { get => _originalWidth; }
+
+        public BitmapImage OriginalImage { get => _originalImage; set => Set(ref _originalImage, value); }
+
+        public Bitmap BitmapOriginalImage { get => BitmapImage2Bitmap(OriginalImage); }
         public ImageContainer(BitmapImage img)
         {
             OriginalImage = img;
-            _originalHeight = img.Height;
-            _originalWidth = img.Width;
+
+            PresentationImage = img;
             CurrentSize = 100;
         }
 
         public void Resize(double percent)
         {
-            CurrentHeight = _originalHeight/100*percent;
-            CurrentWidth = _originalWidth/100*percent;
+            CurrentHeight = OriginalImage.Height/100*percent;
+            CurrentWidth = OriginalImage.Width/100*percent;
+        }
+
+        private Bitmap BitmapImage2Bitmap(BitmapImage bitmapImage)
+        {
+            using (MemoryStream outStream = new MemoryStream())
+            {
+                BitmapEncoder enc = new BmpBitmapEncoder();
+                enc.Frames.Add(BitmapFrame.Create(bitmapImage));
+                enc.Save(outStream);
+                Bitmap bitmap = new Bitmap(outStream);
+
+                return new Bitmap(bitmap);
+            }
         }
     }
 }

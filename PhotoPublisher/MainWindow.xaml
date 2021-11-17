@@ -12,7 +12,7 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <Image Grid.Column="0"
-               Source="{Binding BaseImg.OriginalImage}"/>
+               Source="{Binding BaseImg.PresentationImage}"/>
         <StackPanel Grid.Column="1"
                     Margin="20">
             <Button Padding="5" Margin="5"

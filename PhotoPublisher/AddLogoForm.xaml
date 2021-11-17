@@ -9,27 +9,29 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <Canvas x:Name="canvas"
-                Grid.Column="0"
+            <Canvas x:Name="canvas"
                 PreviewMouseLeftButtonDown="MouseLeftButtonDown"
                 PreviewMouseLeftButtonUp="MouseLeftButtonUp"
                 PreviewMouseMove="MouseMove">
+                
             <Image 
-                Grid.Column="0"
-                Source="{Binding BaseImg.OriginalImage}"/>
+                   Source="{Binding BaseImg.OriginalImage, Mode=OneWay}"
+                   Stretch="Uniform"
+                   MaxWidth="{Binding ActualWidth, ElementName=canvas}"
+                   MaxHeight="{Binding ActualHeight, ElementName=canvas}"
+                   SizeChanged="BaseSizeChanged" />
             <Image 
                     Source="{Binding LogoImg.OriginalImage}"
                     Height="{Binding LogoImg.CurrentHeight}"
                     Width="{Binding LogoImg.CurrentWidth}"
                     Canvas.Left="{Binding LogoLocation.X}"
                     Canvas.Top="{Binding LogoLocation.Y}"
-                    Grid.Column="0"
                     MouseEnter="Canvas_MouseEnter"
                     MouseLeave="Canvas_MouseLeave"
                     MouseMove="Canvas_MouseMove"/>
-        </Canvas>
+            </Canvas>
         <StackPanel Grid.Column="1"
                     Margin="5">
             <Button Margin="5" Padding="5"
