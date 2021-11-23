@@ -16,14 +16,12 @@ namespace PhotoPublisher
         public double CurrentHeight { get => _currentHeight; set => Set(ref _currentHeight, value); }
         public double CurrentWidth { get => _currentWidth; set => Set(ref _currentWidth, value); }
         public double CurrentSize { get => _currentSize; set => Set(ref _currentSize, value, ()=> Resize(value)); }
-
         public BitmapImage OriginalImage { get => _originalImage; set => Set(ref _originalImage, value); }
-
         public Bitmap BitmapOriginalImage { get => BitmapImage2Bitmap(OriginalImage); }
+
         public ImageContainer(BitmapImage img)
         {
             OriginalImage = img;
-
             PresentationImage = img;
             CurrentSize = 100;
         }

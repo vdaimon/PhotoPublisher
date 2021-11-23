@@ -6,6 +6,9 @@
         xmlns:local="clr-namespace:PhotoPublisher"
         mc:Ignorable="d"
         Title="AddLogoForm" Height="450" Width="800">
+    <Window.Resources>
+        <local:CoordinateConverter x:Key="CoordinateConverter" />
+    </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -14,23 +17,31 @@
             <Canvas x:Name="canvas"
                 PreviewMouseLeftButtonDown="MouseLeftButtonDown"
                 PreviewMouseLeftButtonUp="MouseLeftButtonUp"
-                PreviewMouseMove="MouseMove">
+                PreviewMouseMove="MouseMove"
+                    ClipToBounds="True">
                 
             <Image 
                    Source="{Binding BaseImg.OriginalImage, Mode=OneWay}"
                    Stretch="Uniform"
                    MaxWidth="{Binding ActualWidth, ElementName=canvas}"
                    MaxHeight="{Binding ActualHeight, ElementName=canvas}"
-                   SizeChanged="BaseSizeChanged" />
+                   SizeChanged="BaseSizeChanged" 
+                   Loaded="BaseSizeChanged"
+                    />
             <Image 
-                    Source="{Binding LogoImg.OriginalImage}"
+                    Source="{Binding LogoImg.PresentationImage}"
+                    Canvas.Left="{Binding CurrentLocation.X, Mode=OneWay}"
+                    Canvas.Top="{Binding CurrentLocation.Y, Mode=OneWay}"
                     Height="{Binding LogoImg.CurrentHeight}"
                     Width="{Binding LogoImg.CurrentWidth}"
-                    Canvas.Left="{Binding LogoLocation.X}"
-                    Canvas.Top="{Binding LogoLocation.Y}"
                     MouseEnter="Canvas_MouseEnter"
                     MouseLeave="Canvas_MouseLeave"
-                    MouseMove="Canvas_MouseMove"/>
+                    MouseMove="Canvas_MouseMove"
+                    Stretch="Uniform"
+                    MaxWidth="{Binding ActualWidth, ElementName=canvas}"
+                    MaxHeight="{Binding ActualHeight, ElementName=canvas}"
+                    SizeChanged="LogoSizeChanged"/>
+
             </Canvas>
         <StackPanel Grid.Column="1"
                     Margin="5">
@@ -38,15 +49,15 @@
                     Content="Open logo"
                     Click="OpenLogoButtonClick"/>
             <TextBox Margin="5" Padding="5"
-                     Text="{Binding LogoLocation}"/>
+                     Text="{Binding CurrentLocation, Converter={StaticResource CoordinateConverter}}"/>
             <Slider Margin="5" Padding="5"
-                    Value="{Binding LogoImg.CurrentSize}"
+                    Value="{Binding ResizeLogoCoeff}"
                     MinWidth="200"
-                    Maximum="{Binding MaxChangesSize}"/>
+                    Minimum="0.1"
+                    Maximum="1"/>
             <Button Margin="5" Padding="5"
                     Content="Save"
                     Click="SaveButtonClick"/>
-
         </StackPanel>
     </Grid>
 </Window>

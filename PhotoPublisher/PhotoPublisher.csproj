@@ -59,6 +59,7 @@
     <Compile Include="AddLogoForm.xaml.cs">
       <DependentUpon>AddLogoForm.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CoordinateConverter.cs" />
     <Compile Include="ImageExtensions.cs" />
     <Compile Include="ImageContainer.cs" />
     <Compile Include="Window1.xaml.cs">
