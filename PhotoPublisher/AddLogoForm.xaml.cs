@@ -5,7 +5,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Drawing;
-using System.Windows.Media.Imaging;
 using System.Drawing.Imaging;
 
 namespace PhotoPublisher
@@ -15,17 +14,16 @@ namespace PhotoPublisher
         private ImageContainer _logoImg = null;
         private bool _isMouseLeftButtonDown;
         private bool _isMouseInsideLogo;
-        private System.Windows.Point _logoLocation;
         private System.Windows.Point _mouseLocation;
         private System.Windows.Size _currentBaseSize;
         private System.Windows.Point _currentLocation;
         private System.Windows.Size _previousBaseSize;
-        private System.Windows.Size _logoSize;
         private double _baseHeightCoeff;
         private double _baseWidthCoeff;
         private double _logoHeightCoeff;
         private double _logoWidthCoeff;
         private double _resizeLogoCoeff;
+        private double _maxLogoResizeCoeff;
 
         public ImageContainer LogoImg { get => _logoImg; set => Set(ref _logoImg, value); }
         public ImageContainer BaseImg { get; }
@@ -33,9 +31,13 @@ namespace PhotoPublisher
         public System.Windows.Point MouseLocation { get => _mouseLocation; set => Set(ref _mouseLocation, value); }
         public bool IsMouseLeftButtonDown { get => _isMouseLeftButtonDown; set => Set(ref _isMouseLeftButtonDown, value); }
         public bool IsMouseInsideLogo { get => _isMouseInsideLogo; set => Set(ref _isMouseInsideLogo, value); }
-        public System.Windows.Size LogoSize { get => _logoSize; set => Set(ref _logoSize, value, () => SetLogoCoeff()); }
         public double ResizeLogoCoeff { get => _resizeLogoCoeff; set => Set(ref _resizeLogoCoeff, value, () => ResizeLogo()); }
-        
+
+        public double MaxLogoResizeCoeff { get => _maxLogoResizeCoeff; set => Set(ref _maxLogoResizeCoeff, value); }
+
+
+
+
         private void DebugInfo(string msg)
         {
             System.Diagnostics.Debug.WriteLine(msg);
@@ -45,42 +47,61 @@ namespace PhotoPublisher
             _isMouseLeftButtonDown = false;
             BaseImg = baseImg;
             CurrentLocation = new System.Windows.Point(0, 0);
-            ResizeLogoCoeff = 1;
+            _baseHeightCoeff = 1;
+            _baseWidthCoeff = 1;
+            ResizeLogoCoeff = 0.5;
+            MaxLogoResizeCoeff = 1;
         }
 
-        private void SetLogoCoeff()
-        {
-            _logoHeightCoeff = _currentBaseSize.Height / _logoSize.Height;
-            _logoWidthCoeff = _currentBaseSize.Width / _logoSize.Width;
-        }
+
         public void ResizeBase(System.Windows.Size newSize)
         {
             if (_previousBaseSize != null)
                 _previousBaseSize = _currentBaseSize;
-                
+
             if (newSize != null)
                 _currentBaseSize = newSize;
 
             _baseHeightCoeff = _currentBaseSize.Height / _previousBaseSize.Height;
             _baseWidthCoeff = _currentBaseSize.Width / _previousBaseSize.Width;
 
-            ResizeLogo();
+            ResizeLogo(true);
         }
-        private void ResizeLogo()
+        private void ResizeLogo(bool reposition = false)
         {
             if (LogoImg != null)
             {
-                LogoImg.CurrentHeight = LogoSize.Height * _baseHeightCoeff * _logoHeightCoeff * _resizeLogoCoeff;
-                LogoImg.CurrentWidth = LogoSize.Width * _baseWidthCoeff * _logoWidthCoeff * ResizeLogoCoeff;
+                LogoImg.CurrentHeight = LogoImg.OriginalImage.Height * _baseHeightCoeff * _logoHeightCoeff * _resizeLogoCoeff;
+                LogoImg.CurrentWidth = LogoImg.OriginalImage.Width * _baseWidthCoeff * _logoWidthCoeff * _resizeLogoCoeff;
 
-                DebugInfo($"x-{CurrentLocation.X}, y-{CurrentLocation.Y}");
-                DebugInfo($"heightCoeff-{_baseHeightCoeff}, widthCoeff-{_baseWidthCoeff}");
+                if (reposition)
+                    SetCurrentLogoLocation(new System.Windows.Point(CurrentLocation.X * _baseWidthCoeff, CurrentLocation.Y * _baseHeightCoeff));
 
-                if (_baseWidthCoeff > double.MaxValue || _baseWidthCoeff < double.MinValue)
-                    return;
 
-                CurrentLocation = new System.Windows.Point(CurrentLocation.X * _baseWidthCoeff, CurrentLocation.Y * _baseHeightCoeff);
+                var widthDiff = CurrentLocation.X + LogoImg.CurrentWidth - _currentBaseSize.Width;
+                var heigthDiff = CurrentLocation.Y + LogoImg.CurrentHeight - _currentBaseSize.Height;
+
+                if (widthDiff > 0)
+                    SetCurrentLogoLocation(new System.Windows.Point(CurrentLocation.X - widthDiff, CurrentLocation.Y));
+                if (heigthDiff > 0)
+                    SetCurrentLogoLocation(new System.Windows.Point(CurrentLocation.X, CurrentLocation.Y - heigthDiff));
             }
+        }
+
+        public void SetCurrentLogoLocation(System.Windows.Point point)
+        {
+            if (point.X > _currentBaseSize.Width - LogoImg.CurrentWidth)
+                point.X = _currentBaseSize.Width - LogoImg.CurrentWidth;
+            if (point.Y > _currentBaseSize.Height - LogoImg.CurrentHeight)
+                point.Y = _currentBaseSize.Height - LogoImg.CurrentHeight;
+            if (point.X < 0)
+                point.X = 0;
+            if (point.Y < 0)
+                point.Y = 0;
+
+            CurrentLocation = point;
+            MaxLogoResizeCoeff = Math.Min(LogoImg.CurrentHeight/(_currentBaseSize.Height + CurrentLocation.Y), LogoImg.CurrentWidth/(_currentBaseSize.Width + CurrentLocation.X));
+
         }
 
         public void SetLogoImage(string logoPath)
@@ -89,8 +110,13 @@ namespace PhotoPublisher
             {
                 LogoImg = new ImageContainer(logo.GetBitmapImage());
             }
-            LogoImg.CurrentHeight = LogoImg.OriginalImage.Height * BaseImg.OriginalImage.Height / BaseImg.CurrentHeight;
-            LogoImg.CurrentWidth = LogoImg.OriginalImage.Width * BaseImg.OriginalImage.Width / BaseImg.CurrentWidth;
+
+            var c = Math.Min(BaseImg.OriginalImage.Height / LogoImg.OriginalImage.Height, BaseImg.OriginalImage.Width / LogoImg.OriginalImage.Width);
+
+            _logoHeightCoeff = _currentBaseSize.Height / BaseImg.OriginalImage.Height * c;
+            _logoWidthCoeff = _currentBaseSize.Width / BaseImg.OriginalImage.Width * c;
+
+            ResizeLogo();
         }
 
         public Bitmap SaveResultImage()
@@ -100,11 +126,8 @@ namespace PhotoPublisher
             logoPic.MakeTransparent();
             Bitmap res = new Bitmap(basePic.Width,basePic.Height, PixelFormat.Format32bppArgb);
 
-            var x = _logoLocation.X * basePic.Width/ _currentBaseSize.Width;
-            var y = _logoLocation.Y * basePic.Height / _currentBaseSize.Height; 
-
-            System.Diagnostics.Debug.WriteLine(x.ToString());
-            System.Diagnostics.Debug.WriteLine(y.ToString());
+            var x = CurrentLocation.X * basePic.Width/ _currentBaseSize.Width;
+            var y = CurrentLocation.Y * basePic.Height / _currentBaseSize.Height; 
 
             Graphics g = Graphics.FromImage(res);
 
@@ -147,7 +170,7 @@ namespace PhotoPublisher
             {
                 var location = e.GetPosition((Canvas)sender);
                 var diff = location - _dataContext.MouseLocation;
-                _dataContext.CurrentLocation += diff;
+                _dataContext.SetCurrentLogoLocation(_dataContext.CurrentLocation + diff);
             }
         }
 
@@ -159,6 +182,7 @@ namespace PhotoPublisher
         private void Canvas_MouseLeave(object sender, MouseEventArgs e)
         {
             _dataContext.IsMouseInsideLogo = false;
+            _dataContext.IsMouseLeftButtonDown = false;
         }
 
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
@@ -185,11 +209,6 @@ namespace PhotoPublisher
         {
             var img = (System.Windows.Controls.Image)sender;
             _dataContext.ResizeBase(img.RenderSize);
-        }
-        private void LogoSizeChanged(object sender, RoutedEventArgs e)
-        {
-                var img = (System.Windows.Controls.Image)sender;
-                _dataContext.LogoSize = img.RenderSize;
         }
     }
 }
