@@ -32,14 +32,7 @@
                    SizeChanged="BaseSizeChanged" 
                    Loaded="BaseSizeChanged"/>
                 
-            <Border BorderThickness="1" BorderBrush="Red"
-                    MouseEnter="Canvas_MouseEnter"
-                    MouseLeave="Canvas_MouseLeave"
-                    MouseMove="Canvas_MouseMove"
-                    Canvas.Left="{Binding CurrentLocation.X, Mode=OneWay}"
-                    Canvas.Top="{Binding CurrentLocation.Y, Mode=OneWay}">
-                
-            <Image  Source="{Binding LogoImg.PresentationImage}"
+            <Image  Source="{Binding LogoImg.OriginalImage}"
                     Canvas.Left="{Binding CurrentLocation.X, Mode=OneWay}"
                     Canvas.Top="{Binding CurrentLocation.Y, Mode=OneWay}"
                     Height="{Binding LogoImg.CurrentHeight}"
@@ -50,8 +43,6 @@
                     Stretch="Uniform"
                     MaxWidth="{Binding ActualWidth, ElementName=canvas}"
                     MaxHeight="{Binding ActualHeight, ElementName=canvas}"/>
-                
-            </Border>
         </Canvas>
         
         <StackPanel Grid.Column="1"
@@ -62,12 +53,12 @@
             <TextBox Margin="5" Padding="5"
                      Text="{Binding CurrentLocation, Converter={StaticResource CoordinateConverter}}"/>
             <Slider Margin="5" Padding="5"
-                    Value="{Binding ResizeLogoCoeff}"
+                    Value="{Binding SliderResizeLogoCoeff}"
                     MinWidth="200"
                     Maximum="1"
                     />
             <TextBox Margin="5" Padding="5"
-                     Text="{Binding ResizeLogoCoeff, Converter={StaticResource ResizeLogoCoeffConverter}}"/>
+                     Text="{Binding SliderResizeLogoCoeff, Converter={StaticResource ResizeLogoCoeffConverter}}"/>
             <Button Margin="5" Padding="5"
                     Content="Save"
                     Click="SaveButtonClick"/>
