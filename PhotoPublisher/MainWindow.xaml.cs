@@ -23,10 +23,8 @@ namespace PhotoPublisher
 
         public void SetBaseImage(string basePath)
         {
-            using (SixLabors.ImageSharp.Image img = SixLabors.ImageSharp.Image.Load(basePath))
-            {
-                BaseImg = new ImageContainer(img.GetBitmapImage());
-            }
+            SixLabors.ImageSharp.Image img = SixLabors.ImageSharp.Image.Load(basePath);
+            BaseImg = new ImageContainer(img.GetBitmapImage(), img);
         }
     }
     public partial class MainWindow : Window

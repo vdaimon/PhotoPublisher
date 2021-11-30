@@ -42,7 +42,8 @@
                     MouseMove="Canvas_MouseMove"
                     Stretch="Uniform"
                     MaxWidth="{Binding ActualWidth, ElementName=canvas}"
-                    MaxHeight="{Binding ActualHeight, ElementName=canvas}"/>
+                    MaxHeight="{Binding ActualHeight, ElementName=canvas}"
+                    Opacity="{Binding LogoOpacity}"/>
         </Canvas>
         
         <StackPanel Grid.Column="1"
@@ -52,13 +53,33 @@
                     Click="OpenLogoButtonClick"/>
             <TextBox Margin="5" Padding="5"
                      Text="{Binding CurrentLocation, Converter={StaticResource CoordinateConverter}}"/>
-            <Slider Margin="5" Padding="5"
-                    Value="{Binding SliderResizeLogoCoeff}"
-                    MinWidth="200"
-                    Maximum="1"
-                    />
-            <TextBox Margin="5" Padding="5"
-                     Text="{Binding SliderResizeLogoCoeff, Converter={StaticResource ResizeLogoCoeffConverter}}"/>
+            
+            <Border BorderThickness="0.5" BorderBrush="Black">
+                <StackPanel>
+                    <TextBlock Margin="5" Padding="5"
+                               Text="Size"/>
+                    <Slider Margin="5" Padding="5"
+                            Value="{Binding SliderResizeLogoCoeff}"
+                            MinWidth="200"
+                            Maximum="1"
+                            />
+                    <TextBox Margin="5" Padding="5"
+                             Text="{Binding SliderResizeLogoCoeff, Converter={StaticResource ResizeLogoCoeffConverter}}"/>
+                </StackPanel>
+            </Border>
+
+            <Border BorderThickness="0.5" BorderBrush="Black">
+                <StackPanel>
+                    <TextBlock Margin="5" Padding="5"
+                         Text="Opacity"/>
+                    <Slider Margin="5" Padding="5"
+                            Value="{Binding LogoOpacity}"
+                            Maximum="1"/>
+                    <TextBox Margin="5" Padding="5"
+                     Text="{Binding LogoOpacity, Converter={StaticResource ResizeLogoCoeffConverter}}"/>
+                </StackPanel>
+            </Border>
+
             <Button Margin="5" Padding="5"
                     Content="Save"
                     Click="SaveButtonClick"/>

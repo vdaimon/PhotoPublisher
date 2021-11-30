@@ -15,13 +15,15 @@ namespace PhotoPublisher
         public double CurrentWidth { get => _currentWidth; set => Set(ref _currentWidth, value, () => SetCurrentSize()); }
         public System.Windows.Size CurrentSize { get => _currentSize; set => Set(ref _currentSize, value, () => SetCurrentSize(true)); }
         public BitmapImage OriginalImage { get => _originalImage; set => Set(ref _originalImage, value); }
-        public Bitmap BitmapOriginalImage { get => BitmapImage2Bitmap(OriginalImage); }
+        public Bitmap BitmapOriginalImage { get => BitmapImage2Bitmap(); }
+        public SixLabors.ImageSharp.Image SixLaborsImage { get;}
 
-        public ImageContainer(BitmapImage img)
+        public ImageContainer(BitmapImage img, SixLabors.ImageSharp.Image original)
         {
             OriginalImage = img;
             CurrentHeight = OriginalImage.Height;
             CurrentWidth = OriginalImage.Width;
+            SixLaborsImage = original;
         }
 
         private void SetCurrentSize(bool isSizeChanged = false)
@@ -34,16 +36,15 @@ namespace PhotoPublisher
             else  _currentSize = new System.Windows.Size(CurrentWidth, CurrentHeight);
         }
 
-        private Bitmap BitmapImage2Bitmap(BitmapImage bitmapImage)
+        private Bitmap BitmapImage2Bitmap()
         {
             using (MemoryStream outStream = new MemoryStream())
             {
                 BitmapEncoder enc = new BmpBitmapEncoder();
-                enc.Frames.Add(BitmapFrame.Create(bitmapImage));
+                enc.Frames.Add(BitmapFrame.Create(OriginalImage));
                 enc.Save(outStream);
-                Bitmap bitmap = new Bitmap(outStream);
 
-                return new Bitmap(bitmap);
+                return new Bitmap(outStream);
             }
         }
     }

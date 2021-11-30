@@ -1,4 +1,6 @@
-﻿using Microsoft.Win32;
+﻿
+
+using Microsoft.Win32;
 using System;
 using System.IO;
 using System.Windows;
@@ -6,6 +8,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Drawing;
 using System.Drawing.Imaging;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 
 namespace PhotoPublisher
 {
@@ -23,6 +27,7 @@ namespace PhotoPublisher
         private double _originalBaseResizeWidthCoeff;
         private double _originalSizeLogoCoeff;
         private double _sliderResizeLogoCoeff = 0.5;
+        private double _logoOpacity = 1;
 
         public ImageContainer LogoImg { get => _logoImg; set => Set(ref _logoImg, value); }
         public ImageContainer BaseImg { get; }
@@ -31,6 +36,7 @@ namespace PhotoPublisher
         public bool IsMouseLeftButtonDown { get => _isMouseLeftButtonDown; set => Set(ref _isMouseLeftButtonDown, value); }
         public bool IsMouseInsideLogo { get => _isMouseInsideLogo; set => Set(ref _isMouseInsideLogo, value); }
         public double SliderResizeLogoCoeff { get => _sliderResizeLogoCoeff; set => Set(ref _sliderResizeLogoCoeff, value, () => ResizeLogo()); }
+        public double LogoOpacity { get => _logoOpacity; set => Set(ref _logoOpacity, value); }
 
         public AddLogoFormDataContext(ImageContainer baseImg)
         {
@@ -92,10 +98,8 @@ namespace PhotoPublisher
 
         public void SetLogoImage(string logoPath)
         {
-            using (SixLabors.ImageSharp.Image logo = SixLabors.ImageSharp.Image.Load(logoPath))
-            {
-                LogoImg = new ImageContainer(logo.GetBitmapImage());
-            }
+            SixLabors.ImageSharp.Image logo = SixLabors.ImageSharp.Image.Load(logoPath);
+            LogoImg = new ImageContainer(logo.GetBitmapImage(), logo);
 
             _originalSizeLogoCoeff = Math.Min(BaseImg.OriginalImage.Height / LogoImg.OriginalImage.Height, BaseImg.OriginalImage.Width / LogoImg.OriginalImage.Width);
 
@@ -121,6 +125,18 @@ namespace PhotoPublisher
             g.Flush();
             g.DrawImage(logoPic, (Single)x, (Single)y, (Single)(LogoImg.CurrentWidth*wCoeff), (Single)(LogoImg.CurrentHeight*hCoeff));
             g.Flush();
+
+            System.Diagnostics.Debug.WriteLine($"baseHeight {BaseImg.OriginalImage.DpiX}");
+
+
+
+            SixLabors.ImageSharp.Image imgBase = BaseImg.SixLaborsImage;
+            SixLabors.ImageSharp.Image imgLogo = LogoImg.SixLaborsImage;
+
+            using (var newLogo = imgLogo.Clone(ctx => ctx.Resize((int)Math.Round(LogoImg.CurrentWidth * wCoeff), (int)Math.Round(LogoImg.CurrentHeight * hCoeff))))
+            using (var newImg = imgBase.Clone(ctx => ctx.DrawImage(newLogo, new SixLabors.ImageSharp.Point((int)Math.Round(x), (int)Math.Round(y)), (float)_logoOpacity)))
+                newImg.SaveAsJpeg("c:\\Temp\\resImg.jpg");
+
             return res;
         }
     }
@@ -189,6 +205,38 @@ namespace PhotoPublisher
 
         private void SaveButtonClick(object sender, RoutedEventArgs e)
         {
+            //SaveFileDialog saveFileDialog = new SaveFileDialog();
+            //saveFileDialog.Filter = "JPEG Image|*.jpg|Bitmap Image|*.bmp|PNG Image|*.png";
+
+            //if (saveFileDialog.ShowDialog() == true)
+            //{                
+            //    ImageConverter conv = new ImageConverter();
+            //    var img = _dataContext.SaveResultImage();
+            //    byte[] imageData = (byte[])conv.ConvertTo(img, typeof(byte[]));
+            //    string ext = System.IO.Path.GetExtension(saveFileDialog.FileName);
+
+
+            //    using (SixLabors.ImageSharp.Image image = SixLabors.ImageSharp.Image.Load(imageData))
+            //    {
+            //        switch(ext)
+            //        {
+            //            case ".jpg":
+            //                image.SaveAsJpeg(saveFileDialog.FileName);
+            //                break;
+            //            case ".bmp":
+            //                image.SaveAsBmp(saveFileDialog.FileName);
+            //                break;
+            //            case ".png":
+            //                image.SaveAsPng(saveFileDialog.FileName);
+            //                break;
+
+            //        }
+            //    }
+
+        //}
+
+
+
             new Window1(_dataContext.SaveResultImage()).ShowDialog();
         }
 
