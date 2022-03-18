@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
+﻿using System.IO;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media.Imaging;
 using Microsoft.Win32;
-using SixLabors.ImageSharp;
+
 
 namespace PhotoPublisher
 {
@@ -24,7 +18,7 @@ namespace PhotoPublisher
         public void SetBaseImage(string basePath)
         {
             SixLabors.ImageSharp.Image img = SixLabors.ImageSharp.Image.Load(basePath);
-            BaseImg = new ImageContainer(img.GetBitmapImage(), img);
+            BaseImg = new ImageContainer(img);
         }
     }
     public partial class MainWindow : Window
@@ -49,6 +43,11 @@ namespace PhotoPublisher
             {
                 _dataContext.SetBaseImage(Path.GetFullPath(openFileDialog.FileName));
             }
+        }
+
+        private void EditMetaButtonClick(object sender, RoutedEventArgs e)
+        {
+            new EditMetadataForm(_dataContext.BaseImg).ShowDialog();
         }
     }
 }

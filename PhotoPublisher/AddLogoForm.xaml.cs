@@ -18,6 +18,7 @@ namespace PhotoPublisher
         private ImageContainer _logoImg = null;
         private bool _isMouseLeftButtonDown;
         private bool _isMouseInsideLogo;
+        private bool _isParameterFormEnable;
         private System.Windows.Point _mouseLocation;
         private System.Windows.Point _currentLocation = new System.Windows.Point(0, 0);
         private System.Windows.Size _previousBaseSize;
@@ -29,14 +30,19 @@ namespace PhotoPublisher
         private double _sliderResizeLogoCoeff = 0.5;
         private double _logoOpacity = 1;
 
+
         public ImageContainer LogoImg { get => _logoImg; set => Set(ref _logoImg, value); }
         public ImageContainer BaseImg { get; }
         public System.Windows.Point CurrentLocation { get => _currentLocation; set => Set(ref _currentLocation, value); }
         public System.Windows.Point MouseLocation { get => _mouseLocation; set => Set(ref _mouseLocation, value); }
         public bool IsMouseLeftButtonDown { get => _isMouseLeftButtonDown; set => Set(ref _isMouseLeftButtonDown, value); }
         public bool IsMouseInsideLogo { get => _isMouseInsideLogo; set => Set(ref _isMouseInsideLogo, value); }
+        public bool IsParameterFormEnable { get => _isParameterFormEnable; set => Set(ref _isParameterFormEnable, value); }
         public double SliderResizeLogoCoeff { get => _sliderResizeLogoCoeff; set => Set(ref _sliderResizeLogoCoeff, value, () => ResizeLogo()); }
         public double LogoOpacity { get => _logoOpacity; set => Set(ref _logoOpacity, value); }
+
+
+
 
         public AddLogoFormDataContext(ImageContainer baseImg)
         {
@@ -54,8 +60,8 @@ namespace PhotoPublisher
             _currentBaseResizeHeightCoeff = BaseImg.CurrentHeight / _previousBaseSize.Height;
             _currentBaseResizeWidthCoeff = BaseImg.CurrentWidth / _previousBaseSize.Width;
 
-            _originalBaseResizeHeightCoeff = BaseImg.CurrentHeight / BaseImg.OriginalImage.Height;
-            _originalBaseResizeWidthCoeff = BaseImg.CurrentWidth / BaseImg.OriginalImage.Width;
+            _originalBaseResizeHeightCoeff = BaseImg.CurrentHeight / BaseImg.BitmapImage.Height;
+            _originalBaseResizeWidthCoeff = BaseImg.CurrentWidth / BaseImg.BitmapImage.Width;
 
             ResizeLogo(true);
         }
@@ -63,8 +69,8 @@ namespace PhotoPublisher
         {
             if (LogoImg != null)
             {
-                LogoImg.CurrentHeight = LogoImg.OriginalImage.Height * _originalBaseResizeHeightCoeff * _originalSizeLogoCoeff * _sliderResizeLogoCoeff;
-                LogoImg.CurrentWidth = LogoImg.OriginalImage.Width * _originalBaseResizeWidthCoeff * _originalSizeLogoCoeff * _sliderResizeLogoCoeff;
+                LogoImg.CurrentHeight = LogoImg.BitmapImage.Height * _originalBaseResizeHeightCoeff * _originalSizeLogoCoeff * _sliderResizeLogoCoeff;
+                LogoImg.CurrentWidth = LogoImg.BitmapImage.Width * _originalBaseResizeWidthCoeff * _originalSizeLogoCoeff * _sliderResizeLogoCoeff;
 
                 if (reposition)
                 {
@@ -98,46 +104,50 @@ namespace PhotoPublisher
 
         public void SetLogoImage(string logoPath)
         {
-            SixLabors.ImageSharp.Image logo = SixLabors.ImageSharp.Image.Load(logoPath);
-            LogoImg = new ImageContainer(logo.GetBitmapImage(), logo);
+            IsParameterFormEnable = true;
 
-            _originalSizeLogoCoeff = Math.Min(BaseImg.OriginalImage.Height / LogoImg.OriginalImage.Height, BaseImg.OriginalImage.Width / LogoImg.OriginalImage.Width);
+            SixLabors.ImageSharp.Image logo = SixLabors.ImageSharp.Image.Load(logoPath);
+            LogoImg = new ImageContainer(logo);
+
+            _originalSizeLogoCoeff = Math.Min(BaseImg.BitmapImage.Height / LogoImg.BitmapImage.Height, BaseImg.BitmapImage.Width / LogoImg.BitmapImage.Width);
 
             ResizeLogo();
         }
 
-        public Bitmap SaveResultImage()
+        public void SaveResultImage()
         {
-            var basePic = BaseImg.BitmapOriginalImage;
-            var logoPic = LogoImg.BitmapOriginalImage;
-            logoPic.MakeTransparent();
-            Bitmap res = new Bitmap(basePic.Width,basePic.Height, PixelFormat.Format32bppArgb);
-
-            var hCoeff  = basePic.Height/BaseImg.CurrentHeight;
-            var wCoeff = basePic.Width/BaseImg.CurrentWidth;
+            var hCoeff  = BaseImg.SixLaborsImage.Height/BaseImg.CurrentHeight;
+            var wCoeff = BaseImg.SixLaborsImage.Width/BaseImg.CurrentWidth;
 
             var x = CurrentLocation.X * wCoeff;
-            var y = CurrentLocation.Y * hCoeff; 
-
-            Graphics g = Graphics.FromImage(res);
-
-            g.DrawImage(basePic, 0, 0, (Single)basePic.Width, (Single)basePic.Height);
-            g.Flush();
-            g.DrawImage(logoPic, (Single)x, (Single)y, (Single)(LogoImg.CurrentWidth*wCoeff), (Single)(LogoImg.CurrentHeight*hCoeff));
-            g.Flush();
-
-            System.Diagnostics.Debug.WriteLine($"baseHeight {BaseImg.OriginalImage.DpiX}");
-
-
-
-            SixLabors.ImageSharp.Image imgBase = BaseImg.SixLaborsImage;
-            SixLabors.ImageSharp.Image imgLogo = LogoImg.SixLaborsImage;
-
-            using (var newLogo = imgLogo.Clone(ctx => ctx.Resize((int)Math.Round(LogoImg.CurrentWidth * wCoeff), (int)Math.Round(LogoImg.CurrentHeight * hCoeff))))
-            using (var newImg = imgBase.Clone(ctx => ctx.DrawImage(newLogo, new SixLabors.ImageSharp.Point((int)Math.Round(x), (int)Math.Round(y)), (float)_logoOpacity)))
+            var y = CurrentLocation.Y * hCoeff;
+                    
+            using (var newLogo = LogoImg.SixLaborsImage.Clone(ctx => ctx.Resize((int)Math.Round(LogoImg.CurrentWidth * wCoeff), (int)Math.Round(LogoImg.CurrentHeight * hCoeff))))
+            using (var newImg = BaseImg.SixLaborsImage.Clone(ctx => ctx.DrawImage(newLogo, new SixLabors.ImageSharp.Point((int)Math.Round(x), (int)Math.Round(y)), (float)_logoOpacity)))
+            {
                 newImg.SaveAsJpeg("c:\\Temp\\resImg.jpg");
 
-            return res;
+                SaveFileDialog saveFileDialog = new SaveFileDialog();
+                saveFileDialog.Filter = "JPEG Image|*.jpg|Bitmap Image|*.bmp|PNG Image|*.png";
+                saveFileDialog.ShowDialog();
+
+                string path = saveFileDialog.FileName;
+                string ext = System.IO.Path.GetExtension(path);
+
+                switch (ext)
+                {
+                    case ".jpg":
+                        newImg.SaveAsJpeg(path);
+                        break;
+                    case ".bmp":
+                        newImg.SaveAsBmp(path);
+                        break;
+                    case ".png":
+                        newImg.SaveAsPng(path);
+                        break;
+
+                }
+            }
         }
     }
 
@@ -153,7 +163,7 @@ namespace PhotoPublisher
 
         }
 
-        private void MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (_dataContext.IsMouseInsideLogo)
             {
@@ -162,12 +172,12 @@ namespace PhotoPublisher
             }
         }
 
-        private void MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             _dataContext.IsMouseLeftButtonDown = false;
         }
 
-        private void MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+        private void MouseMove(object sender, MouseEventArgs e)
         {
             if (_dataContext.IsMouseLeftButtonDown)
             {
@@ -177,18 +187,18 @@ namespace PhotoPublisher
             }
         }
 
-        private void Canvas_MouseEnter(object sender, MouseEventArgs e)
+        private void LogoMouseEnter(object sender, MouseEventArgs e)
         {
             _dataContext.IsMouseInsideLogo = true;
         }
 
-        private void Canvas_MouseLeave(object sender, MouseEventArgs e)
+        private void LogoMouseLeave(object sender, MouseEventArgs e)
         {
             _dataContext.IsMouseInsideLogo = false;
             _dataContext.IsMouseLeftButtonDown = false;
         }
 
-        private void Canvas_MouseMove(object sender, MouseEventArgs e)
+        private void LogoMouseMove(object sender, MouseEventArgs e)
         {
             _dataContext.MouseLocation = e.GetPosition(canvas);
         }
@@ -205,39 +215,7 @@ namespace PhotoPublisher
 
         private void SaveButtonClick(object sender, RoutedEventArgs e)
         {
-            //SaveFileDialog saveFileDialog = new SaveFileDialog();
-            //saveFileDialog.Filter = "JPEG Image|*.jpg|Bitmap Image|*.bmp|PNG Image|*.png";
-
-            //if (saveFileDialog.ShowDialog() == true)
-            //{                
-            //    ImageConverter conv = new ImageConverter();
-            //    var img = _dataContext.SaveResultImage();
-            //    byte[] imageData = (byte[])conv.ConvertTo(img, typeof(byte[]));
-            //    string ext = System.IO.Path.GetExtension(saveFileDialog.FileName);
-
-
-            //    using (SixLabors.ImageSharp.Image image = SixLabors.ImageSharp.Image.Load(imageData))
-            //    {
-            //        switch(ext)
-            //        {
-            //            case ".jpg":
-            //                image.SaveAsJpeg(saveFileDialog.FileName);
-            //                break;
-            //            case ".bmp":
-            //                image.SaveAsBmp(saveFileDialog.FileName);
-            //                break;
-            //            case ".png":
-            //                image.SaveAsPng(saveFileDialog.FileName);
-            //                break;
-
-            //        }
-            //    }
-
-        //}
-
-
-
-            new Window1(_dataContext.SaveResultImage()).ShowDialog();
+            _dataContext.SaveResultImage();
         }
 
         private void BaseSizeChanged(object sender, RoutedEventArgs e)

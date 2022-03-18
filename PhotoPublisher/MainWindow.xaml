@@ -12,7 +12,8 @@
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <Image Grid.Column="0"
-               Source="{Binding BaseImg.OriginalImage}"/>
+               Margin="2.5"
+               Source="{Binding BaseImg.BitmapImage}"/>
         <StackPanel Grid.Column="1"
                     Margin="20">
             <Button Padding="5" Margin="5"
@@ -21,6 +22,9 @@
             <Button Padding="5" Margin="5"
                     Content="Add logo"
                     Click="AddLogoButtonClick"/>
+            <Button Padding="5" Margin="5"
+                    Content="Edit metadata"
+                    Click="EditMetaButtonClick"/>
         </StackPanel>
     </Grid>
 </Window>

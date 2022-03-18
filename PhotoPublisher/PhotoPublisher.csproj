@@ -38,6 +38,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -50,6 +51,7 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -60,13 +62,21 @@
       <DependentUpon>AddLogoForm.xaml</DependentUpon>
     </Compile>
     <Compile Include="CoordinateConverter.cs" />
+    <Compile Include="EditMetadataForm.xaml.cs">
+      <DependentUpon>EditMetadataForm.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ExifContainer.cs" />
     <Compile Include="ImageExtensions.cs" />
     <Compile Include="ImageContainer.cs" />
-    <Compile Include="ResizeLogoCoeffConverter.cs" />
+    <Compile Include="ValuesToPercentConverter.cs" />
     <Compile Include="Window1.xaml.cs">
       <DependentUpon>Window1.xaml</DependentUpon>
     </Compile>
     <Page Include="AddLogoForm.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="EditMetadataForm.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

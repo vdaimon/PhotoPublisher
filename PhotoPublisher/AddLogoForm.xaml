@@ -8,81 +8,107 @@
         Title="AddLogoForm" Height="450" Width="800">
     <Window.Resources>
         <local:CoordinateConverter x:Key="CoordinateConverter" />
-        <local:ResizeLogoCoeffConverter x:Key="ResizeLogoCoeffConverter"/>
+        <local:ValuesToPercentConverter x:Key="ValuesToPercentConverter"/>
     </Window.Resources>
+    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        
-            <Canvas x:Name="canvas"
+
+        <!--Image area-->
+        <Canvas x:Name="canvas" Grid.Column="0"
+                Margin="2.5"
                 PreviewMouseLeftButtonDown="MouseLeftButtonDown"
                 PreviewMouseLeftButtonUp="MouseLeftButtonUp"
                 PreviewMouseMove="MouseMove"
                 ClipToBounds="True"
                 MinHeight="1"
                 MinWidth="1">
-                
-            <Image 
-                   Source="{Binding BaseImg.OriginalImage, Mode=OneWay}"
+
+            <!--Base image-->
+            <Image Source="{Binding BaseImg.BitmapImage, Mode=OneWay}"
                    Stretch="Uniform"
                    MaxWidth="{Binding ActualWidth, ElementName=canvas}"
                    MaxHeight="{Binding ActualHeight, ElementName=canvas}"
                    SizeChanged="BaseSizeChanged" 
                    Loaded="BaseSizeChanged"/>
-                
-            <Image  Source="{Binding LogoImg.OriginalImage}"
+
+            <!--Logo image-->
+            <Image  Source="{Binding LogoImg.BitmapImage}"
                     Canvas.Left="{Binding CurrentLocation.X, Mode=OneWay}"
                     Canvas.Top="{Binding CurrentLocation.Y, Mode=OneWay}"
                     Height="{Binding LogoImg.CurrentHeight}"
                     Width="{Binding LogoImg.CurrentWidth}"
-                    MouseEnter="Canvas_MouseEnter"
-                    MouseLeave="Canvas_MouseLeave"
-                    MouseMove="Canvas_MouseMove"
+                    MouseEnter="LogoMouseEnter"
+                    MouseLeave="LogoMouseLeave"
+                    MouseMove="LogoMouseMove"
                     Stretch="Uniform"
                     MaxWidth="{Binding ActualWidth, ElementName=canvas}"
                     MaxHeight="{Binding ActualHeight, ElementName=canvas}"
                     Opacity="{Binding LogoOpacity}"/>
         </Canvas>
-        
+
+        <!--Settings area-->
         <StackPanel Grid.Column="1"
                     Margin="5">
-            <Button Margin="5" Padding="5"
+            
+            <!--Open button-->
+            <Button Margin="2.5" Padding="2.5"
                     Content="Open logo"
                     Click="OpenLogoButtonClick"/>
-            <TextBox Margin="5" Padding="5"
-                     Text="{Binding CurrentLocation, Converter={StaticResource CoordinateConverter}}"/>
-            
-            <Border BorderThickness="0.5" BorderBrush="Black">
+
+            <!--Edit forms-->
+            <Border IsEnabled="{Binding IsParameterFormEnable}">
                 <StackPanel>
-                    <TextBlock Margin="5" Padding="5"
-                               Text="Size"/>
-                    <Slider Margin="5" Padding="5"
-                            Value="{Binding SliderResizeLogoCoeff}"
-                            MinWidth="200"
-                            Maximum="1"
-                            />
-                    <TextBox Margin="5" Padding="5"
-                             Text="{Binding SliderResizeLogoCoeff, Converter={StaticResource ResizeLogoCoeffConverter}}"/>
+
+                    <!--Coordinate edit form-->
+                    <Border BorderThickness="0.5" BorderBrush="Black"
+                            Margin="2.5" Padding="2.5">
+                        <StackPanel>
+                            <TextBlock Margin="5" Padding="5"
+                               Text="Coordinates"/>
+                            <TextBox Margin="5" Padding="5"
+                                     Text="{Binding CurrentLocation, Converter={StaticResource CoordinateConverter}}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!--Size edit form-->
+                    <Border BorderThickness="0.5" BorderBrush="Black"
+                            Margin="2.5" Padding="2.5">
+                        <StackPanel>
+                            <TextBlock Margin="5" Padding="5"
+                                       Text="Size"/>
+                            <Slider Margin="5" Padding="5"
+                                    Value="{Binding SliderResizeLogoCoeff}"
+                                    MinWidth="200"
+                                    Maximum="1"/>
+                            <TextBox Margin="5" Padding="5"
+                                     Text="{Binding SliderResizeLogoCoeff, Converter={StaticResource ValuesToPercentConverter}}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!--Opacity edit form-->
+                    <Border BorderThickness="0.5" BorderBrush="Black"
+                            Margin="2.5" Padding="2.5">
+                        <StackPanel>
+                            <TextBlock Margin="5" Padding="5"
+                                       Text="Opacity"/>
+                            <Slider Margin="5" Padding="5"
+                                    Value="{Binding LogoOpacity}"
+                                    Maximum="1"/>
+                            <TextBox Margin="5" Padding="5"
+                                     Text="{Binding LogoOpacity, Converter={StaticResource ValuesToPercentConverter}}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!--Save button-->
+                    <Button Margin="2.5" Padding="2.5"
+                            Content="Save"
+                            Click="SaveButtonClick"/>
                 </StackPanel>
             </Border>
-
-            <Border BorderThickness="0.5" BorderBrush="Black">
-                <StackPanel>
-                    <TextBlock Margin="5" Padding="5"
-                         Text="Opacity"/>
-                    <Slider Margin="5" Padding="5"
-                            Value="{Binding LogoOpacity}"
-                            Maximum="1"/>
-                    <TextBox Margin="5" Padding="5"
-                     Text="{Binding LogoOpacity, Converter={StaticResource ResizeLogoCoeffConverter}}"/>
-                </StackPanel>
-            </Border>
-
-            <Button Margin="5" Padding="5"
-                    Content="Save"
-                    Click="SaveButtonClick"/>
         </StackPanel>
     </Grid>
 </Window>
