@@ -6,5 +6,5 @@ PhotoPublisher is an application for designing and publishing photos on various 
 Feature|Implementation stage
 ---------|---------
 adding a watermark|implemented
-publication of photos in social networks|in developing
-maintaining statistics of views, likes and comments to photos|in developing
+publication of photos in social networks|developing
+maintaining statistics of views, likes and comments to photos|developing
